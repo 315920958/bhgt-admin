@@ -2,22 +2,23 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { request } from '@/network'
 
 const router = useRouter()
 
-const username = ref('')
-const nickname = ref('')
+const loginCode = ref('')
 const loading = ref(false)
 
 const handleLogin = async () => {
-  if (!username.value.trim()) {
-    ElMessage.warning('请输入用户名')
+  if (!loginCode.value.trim()) {
+    ElMessage.warning('请输入登录码')
     return
   }
   loading.value = true
   try {
-    // TODO: 接 /auth/dev-login，成功后 setToken(token) 再跳转
-    ElMessage.success(`开发登录占位：${username.value} / ${nickname.value || username.value}`)
+    // dev-login 返回的 token 会由 request 拦截器自动写入外层 auth 并存入 localStorage
+    await request('DEV_LOGIN', { loginCode: loginCode.value.trim() })
+    ElMessage.success('登录成功')
     router.push('/')
   } finally {
     loading.value = false
@@ -32,14 +33,11 @@ const handleLogin = async () => {
         <h2>BHGT 后台管理登录</h2>
       </template>
       <el-form label-position="top" @submit.prevent>
-        <el-form-item label="用户名">
-          <el-input v-model="username" placeholder="开发测试用户名" clearable />
-        </el-form-item>
-        <el-form-item label="昵称（可选）">
-          <el-input v-model="nickname" placeholder="默认同用户名" clearable />
+        <el-form-item label="开发登录码">
+          <el-input v-model="loginCode" placeholder="请输入开发登录码" clearable />
         </el-form-item>
         <el-button type="primary" :loading="loading" @click="handleLogin" style="width: 100%">
-          开发登录（待接接口）
+          登录
         </el-button>
       </el-form>
     </el-card>
