@@ -6,18 +6,26 @@ import { request } from '@/network'
 
 const router = useRouter()
 
-const loginCode = ref('')
+const username = ref('')
+const password = ref('')
 const loading = ref(false)
 
 const handleLogin = async () => {
-  if (!loginCode.value.trim()) {
-    ElMessage.warning('请输入登录码')
+  if (!username.value.trim()) {
+    ElMessage.warning('请输入用户名')
+    return
+  }
+  if (!password.value) {
+    ElMessage.warning('请输入密码')
     return
   }
   loading.value = true
   try {
-    // dev-login 返回的 token 会由 request 拦截器自动写入外层 auth 并存入 localStorage
-    await request('DEV_LOGIN', { loginCode: loginCode.value.trim() })
+    // admin-login 返回的 token 会由 request 拦截器自动写入外层 auth 并存入 localStorage
+    await request('ADMIN_LOGIN', {
+      username: username.value.trim(),
+      password: password.value,
+    })
     ElMessage.success('登录成功')
     router.push('/')
   } finally {
@@ -33,8 +41,17 @@ const handleLogin = async () => {
         <h2>BHGT 后台管理登录</h2>
       </template>
       <el-form label-position="top" @submit.prevent>
-        <el-form-item label="开发登录码">
-          <el-input v-model="loginCode" placeholder="请输入开发登录码" clearable />
+        <el-form-item label="用户名">
+          <el-input v-model="username" placeholder="请输入用户名" clearable />
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input
+            v-model="password"
+            type="password"
+            placeholder="请输入密码"
+            show-password
+            @keyup.enter="handleLogin"
+          />
         </el-form-item>
         <el-button type="primary" :loading="loading" @click="handleLogin" style="width: 100%">
           登录

@@ -12,7 +12,7 @@ export interface ApiConfigItem {
  */
 export const apiConfig = {
   HEALTH: { url: '/api', method: 'get' },
-  DEV_LOGIN: { url: '/api/auth/dev-login', method: 'post' },
+  ADMIN_LOGIN: { url: '/api/auth/admin-login', method: 'post' },
 } as const satisfies Record<string, ApiConfigItem>
 
 export type ApiKey = keyof typeof apiConfig
