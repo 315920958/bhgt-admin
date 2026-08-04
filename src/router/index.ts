@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getToken } from '@/network/token'
 import MainLayout from '@/layouts/MainLayout.vue'
 
 const router = createRouter({
@@ -60,6 +61,23 @@ const router = createRouter({
       ],
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const token = getToken()
+  const isPublic = to.meta?.public === true
+
+  if (!isPublic && !token) {
+    // 未登录且访问非公开页 -> 去登录
+    return next({ name: 'Login', replace: true })
+  }
+
+  if (to.name === 'Login' && token) {
+    // 已登录访问登录页 -> 回首页
+    return next({ path: '/', replace: true })
+  }
+
+  next()
 })
 
 export default router
