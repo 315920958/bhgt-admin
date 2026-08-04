@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import request from './api/request'
+import { request } from '@/network'
 
 const message = ref('加载中...')
 
 onMounted(async () => {
   try {
-    const { data } = await request.get('/')
-    message.value = typeof data === 'string' ? data : JSON.stringify(data)
-  } catch (e) {
-    message.value = '连接后端失败：' + (e instanceof Error ? e.message : String(e))
+    // request 已自动拆包 MESSAGE_BODY，并统一处理异常/弹窗
+    const body = await request<string>('HEALTH')
+    message.value = body
+  } catch {
+    message.value = '请求失败（见弹窗提示）'
   }
 })
 </script>
@@ -17,7 +18,7 @@ onMounted(async () => {
 <template>
   <div class="container">
     <h1>BHGT 后台管理</h1>
-    <p>来自服务端 (bhgt-server :4001) 的响应：</p>
+    <p>来自服务端 (bhgt-server) 的 MESSAGE_BODY：</p>
     <pre>{{ message }}</pre>
   </div>
 </template>
