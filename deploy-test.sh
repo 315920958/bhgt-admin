@@ -5,7 +5,9 @@
 # test = 线上 dev。前端请求地址固定为 https://develop.server.bhgt.sixonehub.site
 #
 # 用法：
-#   ./deploy-test.sh
+#   ./deploy-test.sh              # 不安装依赖（默认）
+#   ./deploy-test.sh install      # 安装依赖（首次部署或依赖变更时）
+#   也可写 ./deploy-test.sh --install-deps 或 -i
 #
 set -euo pipefail
 
@@ -15,6 +17,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "==> [bhgt-admin:test] 部署目录: $SCRIPT_DIR"
 cd "$SCRIPT_DIR"
+
+# 参数：第一个参数为 install / --install-deps / -i 时安装依赖，否则跳过（默认跳过）
+INSTALL_DEPS=0
+case "${1:-}" in
+  install|--install-deps|-i) INSTALL_DEPS=1 ;;
+esac
 
 # 0. 切到 test 分支并拉取最新（幂等：已在 test 也不会出错，强制对齐远端）
 echo "==> 拉取并切换到 $BRANCH 分支"
@@ -29,9 +37,13 @@ VITE_BHGT_SERVER_URL=$API_URL
 VITE_APP_ENV=test
 EOF
 
-# 2. 安装依赖（走国内镜像更快）
-echo "==> 安装依赖"
-npm install --registry=https://registry.npmmirror.com --no-audit --no-fund --ignore-scripts
+# 2. 安装依赖（默认跳过；传 install / --install-deps / -i 才安装，如首次部署或依赖变更）
+if [ "$INSTALL_DEPS" = "1" ]; then
+  echo "==> 安装依赖"
+  npm install --registry=https://registry.npmmirror.com --no-audit --no-fund --ignore-scripts
+else
+  echo "==> 跳过依赖安装（默认；如需安装请传参 install）"
+fi
 
 # 3. 重新打包（vue-tsc 类型检查 + vite build）
 echo "==> 构建"
