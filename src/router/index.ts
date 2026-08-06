@@ -29,12 +29,6 @@ const router = createRouter({
           meta: { title: '剧情节点' },
         },
         {
-          path: 'buttons',
-          name: 'ButtonList',
-          component: () => import('@/views/buttons/ButtonListView.vue'),
-          meta: { title: '按钮配置' },
-        },
-        {
           path: 'items',
           name: 'ItemList',
           component: () => import('@/views/items/ItemListView.vue'),

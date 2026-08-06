@@ -5,7 +5,6 @@ import { clearToken } from '@/network/token'
 import {
   HomeFilled,
   Reading,
-  Mouse,
   Box,
   MagicStick,
   PictureFilled,
@@ -29,7 +28,6 @@ const menuItems = [
   { path: '/attributes', title: '属性', icon: Setting },
   { path: '/items', title: '物品配置', icon: Box },
   { path: '/talents', title: '天赋配置', icon: MagicStick },
-  { path: '/buttons', title: '按钮配置', icon: Mouse },
   { path: '/nodes', title: '剧情节点', icon: Reading },
   { path: '/stages', title: '大阶段', icon: Flag },
   { path: '/products', title: '商品', icon: Goods },
