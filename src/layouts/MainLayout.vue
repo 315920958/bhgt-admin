@@ -9,6 +9,13 @@ import {
   MagicStick,
   PictureFilled,
   UserFilled,
+  Setting,
+  Goods,
+  Medal,
+  InfoFilled,
+  Avatar,
+  Flag,
+  Trophy,
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -18,12 +25,19 @@ const activeMenu = computed(() => route.path)
 
 const menuItems = [
   { path: '/dashboard', title: '概览', icon: HomeFilled },
-  { path: '/nodes', title: '剧情节点', icon: Reading },
-  { path: '/buttons', title: '按钮配置', icon: Mouse },
+  { path: '/attributes', title: '属性', icon: Setting },
   { path: '/items', title: '物品配置', icon: Box },
   { path: '/talents', title: '天赋配置', icon: MagicStick },
+  { path: '/buttons', title: '按钮配置', icon: Mouse },
+  { path: '/nodes', title: '剧情节点', icon: Reading },
+  { path: '/stages', title: '大阶段', icon: Flag },
+  { path: '/products', title: '商品', icon: Goods },
   { path: '/cg', title: 'CG 图鉴', icon: PictureFilled },
+  { path: '/realms', title: '境界', icon: Medal },
+  { path: '/battles', title: '战斗评分', icon: Trophy },
+  { path: '/gameinfo', title: '游戏信息', icon: InfoFilled },
   { path: '/users', title: '玩家列表', icon: UserFilled },
+  { path: '/admin-users', title: '管理员列表', icon: Avatar },
 ]
 
 const handleLogout = () => {

@@ -58,12 +58,54 @@ const router = createRouter({
           component: () => import('@/views/users/UserListView.vue'),
           meta: { title: '玩家列表' },
         },
+        {
+          path: 'attributes',
+          name: 'AttributeList',
+          component: () => import('@/views/attributes/AttributeListView.vue'),
+          meta: { title: '属性' },
+        },
+        {
+          path: 'products',
+          name: 'ProductList',
+          component: () => import('@/views/products/ProductListView.vue'),
+          meta: { title: '商品' },
+        },
+        {
+          path: 'realms',
+          name: 'RealmList',
+          component: () => import('@/views/realms/RealmListView.vue'),
+          meta: { title: '境界' },
+        },
+        {
+          path: 'gameinfo',
+          name: 'GameInfo',
+          component: () => import('@/views/gameinfo/GameInfoView.vue'),
+          meta: { title: '游戏信息' },
+        },
+        {
+          path: 'stages',
+          name: 'StageList',
+          component: () => import('@/views/stages/StageListView.vue'),
+          meta: { title: '大阶段' },
+        },
+        {
+          path: 'battles',
+          name: 'BattleConfig',
+          component: () => import('@/views/battles/BattleConfigView.vue'),
+          meta: { title: '战斗评分' },
+        },
+        {
+          path: 'admin-users',
+          name: 'AdminUserList',
+          component: () => import('@/views/admin-users/AdminUserListView.vue'),
+          meta: { title: '管理员列表' },
+        },
       ],
     },
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const token = getToken()
   const isPublic = to.meta?.public === true
 

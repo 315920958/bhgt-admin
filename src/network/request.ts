@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 import { serverConfig } from '@/config/servers'
-import { apiConfig, type ApiKey } from '@/config/api'
+import { apiConfig, type ApiConfigItem, type ApiKey } from '@/config/api'
 import { getToken, setToken } from '@/network/token'
 import { ApiError, type ApiResponseEnvelope, type RequestOptions } from '@/network/types'
 
@@ -51,19 +51,36 @@ client.interceptors.response.use(
  * - 业务只传接口 Key + 参数
  * - 返回的是信封里的 MESSAGE_BODY（已拆包）
  * - errCode 非 0 时抛 ApiError（已被全局弹窗提示）
+ * - api.pathParams 里的字段会从 URL 的 :name 替换，并从 body/params 里剔除
  */
 export async function request<T = unknown>(
   apiKey: ApiKey,
   data?: unknown,
   options: RequestOptions = {},
 ): Promise<T> {
-  const api = apiConfig[apiKey]
+  const api = apiConfig[apiKey] as ApiConfigItem
+
+  // 1. 处理 pathParams：URL 占位符替换 + 从 body/params 里剔除
+  let url = api.url
+  let body: unknown = data
+  if (api.pathParams && api.pathParams.length > 0 && body && typeof body === 'object') {
+    const bodyObj = { ...(body as Record<string, unknown>) }
+    for (const param of api.pathParams) {
+      const value = bodyObj[param]
+      if (value !== undefined && value !== null) {
+        url = url.replace(`:${param}`, encodeURIComponent(String(value)))
+        delete bodyObj[param]
+      }
+    }
+    body = bodyObj
+  }
+
   const axiosConfig: AxiosRequestConfig & RequestOptions = {
-    url: api.url,
+    url,
     method: api.method,
     timeout: api.timeout,
-    params: api.method === 'get' ? data : undefined,
-    data: api.method === 'get' ? undefined : data,
+    params: api.method === 'get' ? body : undefined,
+    data: api.method === 'get' ? undefined : body,
     silent: options.silent,
     ...options.axios,
   }
