@@ -39,8 +39,16 @@ EOF
 
 # 2. 安装依赖（默认跳过；传 install / --install-deps / -i 才安装，如首次部署或依赖变更）
 if [ "$INSTALL_DEPS" = "1" ]; then
+  # 先清理旧的依赖状态，规避 npm 可选依赖已知 bug
+  # （https://github.com/npm/cli/issues/4828：跨平台 lockfile 残留会导致
+  #  @rollup/rollup-linux-x64-gnu 等原生二进制缺失，vite build 报
+  #  "Cannot find module @rollup/rollup-linux-x64-gnu"）。
+  # 不使用 --ignore-scripts：服务器是 Linux，且不忽略 esbuild 等需在
+  # postinstall 下载/校验平台二进制的包，否则 vite build 会失败。
+  echo "==> 清理旧依赖状态（规避 npm optional 依赖 bug）"
+  rm -rf node_modules package-lock.json
   echo "==> 安装依赖"
-  npm install --registry=https://registry.npmmirror.com --no-audit --no-fund --ignore-scripts
+  npm install --registry=https://registry.npmmirror.com --no-audit --no-fund
 else
   echo "==> 跳过依赖安装（默认；如需安装请传参 install）"
 fi
