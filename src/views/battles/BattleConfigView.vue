@@ -151,9 +151,10 @@ onMounted(() => {
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="超额上限" required>
-              <el-input-number v-model="dialogForm.maxExcess" :min="0" style="width: 100%" />
-            </el-form-item>
+        <el-form-item label="超额上限" required>
+          <el-input-number v-model="dialogForm.maxExcess" :min="-1" style="width: 100%" />
+          <div class="hint-inline">-1 表示无上限</div>
+        </el-form-item>
           </el-col>
         </el-row>
 
@@ -187,6 +188,11 @@ h3, h4 {
   color: #6b7280;
   font-size: 13px;
   margin-top: 8px;
+}
+.hint-inline {
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 4px;
 }
 .tier-header {
   display: flex;
