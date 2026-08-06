@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useCrud } from '@/composables/useCrud'
 import { request } from '@/network'
 import type { ApiKey } from '@/config/api'
@@ -45,6 +46,13 @@ interface Button {
   nextNodeId?: string
   isOneTime: boolean
   afterUse: 'hide' | 'disable'
+  // 灵活结构（文档 §6.3）：开启条件 / 点击消耗 / 点击效果；编辑态用 JSON 字符串
+  conditions?: Record<string, any>
+  costs?: Record<string, any>
+  effects?: Record<string, any>
+  conditionsJson?: string
+  costsJson?: string
+  effectsJson?: string
 }
 interface Node {
   _id?: string
@@ -112,6 +120,17 @@ function makeEmptyButton(): Button {
     weight: 100,
     isOneTime: false,
     afterUse: 'hide',
+    conditionsJson: '',
+    costsJson: '',
+    effectsJson: '',
+  }
+}
+
+function safeStringify(obj: unknown): string {
+  try {
+    return JSON.stringify(obj, null, 2)
+  } catch {
+    return ''
   }
 }
 
@@ -152,6 +171,11 @@ function handleOpenEdit(row: Node) {
   const clone = JSON.parse(JSON.stringify(row))
   if (!clone.battleConfig) clone.battleConfig = makeEmptyBattleConfig()
   if (!clone.buttons) clone.buttons = []
+  clone.buttons.forEach((b: Button) => {
+    b.conditionsJson = b.conditions ? safeStringify(b.conditions) : ''
+    b.costsJson = b.costs ? safeStringify(b.costs) : ''
+    b.effectsJson = b.effects ? safeStringify(b.effects) : ''
+  })
   openEdit(clone as Node)
 }
 
@@ -175,6 +199,21 @@ async function handleSubmit() {
   // 非战斗节点清空 battleConfig，避免后端存冗余数据
   if (!dialogForm.value.isBattle) {
     dialogForm.value.battleConfig = undefined
+  }
+  // 按钮的 conditions/costs/effects：JSON 字符串 → 对象（与文档 §6.3 灵活结构对齐）
+  const buttons: Button[] = dialogForm.value.buttons || []
+  for (const b of buttons) {
+    try {
+      b.conditions = b.conditionsJson?.trim() ? JSON.parse(b.conditionsJson) : undefined
+      b.costs = b.costsJson?.trim() ? JSON.parse(b.costsJson) : undefined
+      b.effects = b.effectsJson?.trim() ? JSON.parse(b.effectsJson) : undefined
+    } catch (e) {
+      ElMessage.error(`按钮「${b.text || b.code || '?'}」的 JSON 解析失败：${(e as Error).message}`)
+      return
+    }
+    delete b.conditionsJson
+    delete b.costsJson
+    delete b.effectsJson
   }
   await submit()
 }
@@ -417,6 +456,33 @@ onMounted(() => {
                 <el-input v-model="btn.minigameId" placeholder="小游戏 ID" />
               </el-col>
             </el-row>
+            <el-divider content-position="left">高级（可选 · JSON，对应文档 §6.3）</el-divider>
+            <el-form label-width="92px" style="margin-top: 2px">
+              <el-form-item label="开启条件">
+                <el-input
+                  v-model="btn.conditionsJson"
+                  type="textarea"
+                  :rows="2"
+                  placeholder='如 {"minLevel":3} 或留空'
+                />
+              </el-form-item>
+              <el-form-item label="点击消耗">
+                <el-input
+                  v-model="btn.costsJson"
+                  type="textarea"
+                  :rows="2"
+                  placeholder='如 {"spiritStone":10} 或留空'
+                />
+              </el-form-item>
+              <el-form-item label="点击效果">
+                <el-input
+                  v-model="btn.effectsJson"
+                  type="textarea"
+                  :rows="2"
+                  placeholder='如 {"lifespan":5,"spiritStone":-2} 或留空'
+                />
+              </el-form-item>
+            </el-form>
           </div>
         </el-tab-pane>
       </el-tabs>
