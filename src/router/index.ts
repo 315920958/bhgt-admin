@@ -83,6 +83,12 @@ const router = createRouter({
           meta: { title: '大阶段' },
         },
         {
+          path: 'node-bundles',
+          name: 'NodeBundleList',
+          component: () => import('@/views/node-bundles/NodeBundleListView.vue'),
+          meta: { title: '节点包' },
+        },
+        {
           path: 'battles',
           name: 'BattleConfig',
           component: () => import('@/views/battles/BattleConfigView.vue'),

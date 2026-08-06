@@ -78,6 +78,13 @@ export const apiConfig = {
   NODES_UPDATE: { url: '/api/admin/nodes/:code', method: 'put', pathParams: ['code'] },
   NODES_DELETE: { url: '/api/admin/nodes/:code', method: 'delete', pathParams: ['code'] },
 
+  // 节点包 config.nodeBundles（阶段 stage 与节点 node 之间的中间层）
+  NODE_BUNDLES_LIST: { url: '/api/admin/node-bundles', method: 'get' },
+  NODE_BUNDLES_DETAIL: { url: '/api/admin/node-bundles/:code', method: 'get', pathParams: ['code'] },
+  NODE_BUNDLES_CREATE: { url: '/api/admin/node-bundles', method: 'post' },
+  NODE_BUNDLES_UPDATE: { url: '/api/admin/node-bundles/:code', method: 'put', pathParams: ['code'] },
+  NODE_BUNDLES_DELETE: { url: '/api/admin/node-bundles/:code', method: 'delete', pathParams: ['code'] },
+
   // 境界 config.realms
   REALMS_LIST: { url: '/api/admin/realms', method: 'get' },
   REALMS_DETAIL: { url: '/api/admin/realms/:code', method: 'get', pathParams: ['code'] },

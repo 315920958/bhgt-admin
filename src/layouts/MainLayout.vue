@@ -15,6 +15,7 @@ import {
   InfoFilled,
   Avatar,
   Flag,
+  Files,
   Trophy,
 } from '@element-plus/icons-vue'
 
@@ -30,6 +31,7 @@ const menuItems = [
   { path: '/talents', title: '天赋配置', icon: MagicStick },
   { path: '/nodes', title: '剧情节点', icon: Reading },
   { path: '/stages', title: '大阶段', icon: Flag },
+  { path: '/node-bundles', title: '节点包', icon: Files },
   { path: '/products', title: '商品', icon: Goods },
   { path: '/cg', title: 'CG 图鉴', icon: PictureFilled },
   { path: '/realms', title: '境界', icon: Medal },
