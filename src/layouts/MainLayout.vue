@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { clearToken } from '@/network/token'
 import {
   HomeFilled,
   Reading,
@@ -41,7 +42,7 @@ const menuItems = [
 ]
 
 const handleLogout = () => {
-  // TODO: 清 token，跳登录
+  clearToken()
   router.push('/login')
 }
 </script>

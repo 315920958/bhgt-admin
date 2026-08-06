@@ -53,6 +53,17 @@ export const apiConfig = {
   GAME_CONFIG_GET: { url: '/api/admin/game-config', method: 'get' },
   GAME_CONFIG_UPDATE: { url: '/api/admin/game-config', method: 'put' },
 
+  // 管理员账号 sys.users（isAdmin=true），主键 _id（ObjectId），路径参数用 :id
+  ADMINS_LIST: { url: '/api/admin/admins', method: 'get' },
+  ADMINS_DETAIL: { url: '/api/admin/admins/:id', method: 'get', pathParams: ['id'] },
+  ADMINS_CREATE: { url: '/api/admin/admins', method: 'post' },
+  ADMINS_UPDATE: { url: '/api/admin/admins/:id', method: 'put', pathParams: ['id'] },
+  ADMINS_DELETE: { url: '/api/admin/admins/:id', method: 'delete', pathParams: ['id'] },
+
+  // 玩家（游戏角色）game.users
+  PLAYERS_LIST: { url: '/api/admin/players', method: 'get' },
+  PLAYERS_TEST_CREATE: { url: '/api/admin/players/test', method: 'post' },
+
   // 大阶段 config.stages
   STAGES_LIST: { url: '/api/admin/stages', method: 'get' },
   STAGES_DETAIL: { url: '/api/admin/stages/:code', method: 'get', pathParams: ['code'] },
