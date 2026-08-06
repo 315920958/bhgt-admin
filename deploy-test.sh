@@ -24,18 +24,24 @@ case "${1:-}" in
   install|--install-deps|-i) INSTALL_DEPS=1 ;;
 esac
 
-# 0. 切到 test 分支并拉取最新（幂等：已在 test 也不会出错，强制对齐远端）
+# 0. 切到 test 分支并拉取最新（强制对齐远端，丢弃本地未提交改动/残留文件，确保一定切到最新）
 echo "==> 拉取并切换到 $BRANCH 分支"
 git fetch origin
-git checkout -B "$BRANCH" "origin/$BRANCH"
+git checkout -f -B "$BRANCH" "origin/$BRANCH"
 
-# 1. 写入前端运行时配置（构建时烤进 dist；.env.test 已随 test 分支进 git，这里再写一遍保持一致）
-#    VITE_BHGT_SERVER_URL = 前端请求的服务端地址
-#    VITE_APP_ENV = 标记部署环境，供前端判断是否显示 dev 登录等开发态 UI
+# 1. 前端运行时配置（构建时烤进 dist）
+#    .env.test 已随 test 分支进 git 并被跟踪——优先使用仓库版本：
+#    以后改域名只需提交 .env.test，服务端 git 即可拿到最新，不必改本脚本。
+#    仅当文件缺失时，才按下方默认值生成，避免覆盖 git 中的最新配置。
+if [ ! -f .env.test ]; then
 cat > .env.test <<EOF
 VITE_BHGT_SERVER_URL=$API_URL
 VITE_APP_ENV=test
 EOF
+echo "==> .env.test 缺失，已按默认值生成"
+else
+echo "==> 使用 git 跟踪的 .env.test（VITE_BHGT_SERVER_URL=$(grep '^VITE_BHGT_SERVER_URL=' .env.test | cut -d= -f2-)）"
+fi
 
 # 2. 安装依赖（默认跳过；传 install / --install-deps / -i 才安装，如首次部署或依赖变更）
 if [ "$INSTALL_DEPS" = "1" ]; then

@@ -8,16 +8,11 @@ dist
 dist-ssr
 *.local
 
-# env
+# env：只忽略本地/私密文件；.env.test / .env.production / .env.example 作为分发包默认进 git 跟踪
 .env
 .env.development
-.env.development.local
-.env.test.local
-.env.production.local
 .env.local
-!.env.example
-!.env.production
-!.env.test
+.env.*.local
 
 # Editor directories and files
 .vscode/*
