@@ -2,7 +2,7 @@
 #
 # deploy-test.sh — bhgt-admin 测试环境部署（在服务器运行）
 #
-# test = 线上 dev。前端请求地址固定为 http://develop.server.bhgt.sixonehub.site
+# test = 线上 dev。前端请求地址固定为 https://develop.server.bhgt.sixonehub.site
 #
 # 用法：
 #   ./deploy-test.sh              # 不安装依赖（默认）
@@ -12,7 +12,7 @@
 set -euo pipefail
 
 BRANCH="test"
-API_URL="http://develop.server.bhgt.sixonehub.site"
+API_URL="https://develop.server.bhgt.sixonehub.site"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "==> [bhgt-admin:test] 部署目录: $SCRIPT_DIR"
