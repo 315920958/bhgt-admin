@@ -44,8 +44,6 @@ interface Button {
   isRequired: boolean
   weight: number
   nextNodeId?: string
-  isOneTime: boolean
-  afterUse: 'hide' | 'disable'
   // 灵活结构（文档 §6.3）：开启条件 / 点击消耗 / 点击效果；编辑态用 JSON 字符串
   conditions?: Record<string, any>
   costs?: Record<string, any>
@@ -118,8 +116,6 @@ function makeEmptyButton(): Button {
     type: 'normal',
     isRequired: false,
     weight: 100,
-    isOneTime: false,
-    afterUse: 'hide',
     conditionsJson: '',
     costsJson: '',
     effectsJson: '',
@@ -425,12 +421,6 @@ onMounted(() => {
                   <el-option label="小游戏" value="minigame" />
                 </el-select>
               </el-col>
-              <el-col :span="4">
-                <el-select v-model="btn.afterUse" placeholder="表现">
-                  <el-option label="隐藏" value="hide" />
-                  <el-option label="禁用" value="disable" />
-                </el-select>
-              </el-col>
             </el-row>
             <el-row :gutter="12" style="margin-top: 8px">
               <el-col :span="6">
@@ -448,9 +438,6 @@ onMounted(() => {
               </el-col>
               <el-col :span="4">
                 <el-checkbox v-model="btn.isRequired">必现</el-checkbox>
-              </el-col>
-              <el-col :span="4">
-                <el-checkbox v-model="btn.isOneTime">一次性</el-checkbox>
               </el-col>
               <el-col :span="4" v-if="btn.type === 'minigame'">
                 <el-input v-model="btn.minigameId" placeholder="小游戏 ID" />
