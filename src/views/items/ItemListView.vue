@@ -4,6 +4,7 @@ import { request } from '@/network'
 import { useCrud } from '@/composables/useCrud'
 
 type ItemType = 'relic' | 'consumable' | 'plot'
+type TabValue = ItemType | 'all'
 
 interface AttributeRef {
   _id: string
@@ -34,13 +35,15 @@ interface Item {
   consumablePerUse?: number
   maxHold?: number
   useCondition?: string
+  lifespan?: number
   // shared
   attributes?: AttributeEffect[]
   createdAt?: string
   updatedAt?: string
 }
 
-const TYPE_TABS: { value: ItemType; label: string }[] = [
+const TYPE_TABS: { value: TabValue; label: string }[] = [
+  { value: 'all', label: '全部' },
   { value: 'relic', label: '遗物' },
   { value: 'consumable', label: '消耗品' },
   { value: 'plot', label: '剧情道具' },
@@ -58,7 +61,7 @@ const QUALITY_TAG: Record<string, 'info' | 'success' | 'warning' | 'danger'> = {
   legendary: 'danger',
 }
 
-const currentType = ref<ItemType>('relic')
+const currentType = ref<TabValue>('all')
 
 const { list, loading, dialogVisible, dialogMode, dialogForm, dialogLoading, fetchList, openCreate, openEdit, closeDialog, submit, remove } =
   useCrud<Item>(
@@ -68,7 +71,7 @@ const { list, loading, dialogVisible, dialogMode, dialogForm, dialogLoading, fet
       update: 'ITEMS_UPDATE',
       remove: 'ITEMS_DELETE',
     },
-    { listQuery: () => ({ type: currentType.value }) },
+    { listQuery: () => (currentType.value === 'all' ? {} : { type: currentType.value }) },
   )
 
 watch(currentType, () => fetchList())
@@ -86,7 +89,8 @@ async function fetchAttributes() {
 
 // 切换 tab 时类型写回（dialogForm.type 需与 currentType 同步）
 function onAdd() {
-  openCreate({ type: currentType.value, attributes: [], permanent: false, purchasable: false, nodeReward: false })
+  const initType: ItemType = currentType.value === 'all' ? 'relic' : currentType.value
+  openCreate({ type: initType, attributes: [], permanent: false, purchasable: false, nodeReward: false })
 }
 
 // 表单校验
@@ -141,13 +145,18 @@ onMounted(() => {
       <div class="toolbar">
         <span class="hint">当前列表：{{ TYPE_TABS.find((x) => x.value === currentType)?.label }}</span>
         <div class="spacer" />
-        <el-button type="primary" @click="onAdd">+ 新增{{ TYPE_TABS.find((x) => x.value === currentType)?.label }}</el-button>
+        <el-button type="primary" @click="onAdd">+ 新增{{ currentType === 'all' ? '物品' : TYPE_TABS.find((x) => x.value === currentType)?.label }}</el-button>
       </div>
 
       <el-table v-loading="loading" :data="list" stripe border>
         <el-table-column prop="code" label="业务标识" width="160" />
         <el-table-column prop="name" label="名称" width="160" />
         <el-table-column prop="description" label="说明" />
+        <el-table-column v-if="currentType === 'all'" label="类型" width="110">
+          <template #default="{ row }">
+            <el-tag size="small">{{ TYPE_TABS.find((x) => x.value === row.type)?.label ?? row.type }}</el-tag>
+          </template>
+        </el-table-column>
 
         <!-- relic 字段 -->
         <template v-if="currentType === 'relic'">
@@ -258,6 +267,10 @@ onMounted(() => {
           </el-form-item>
           <el-form-item label="使用条件">
             <el-input v-model="dialogForm.useCondition" />
+          </el-form-item>
+          <el-form-item label="寿元增益">
+            <el-input-number v-model="dialogForm.lifespan" :min="0" :max="9999" />
+            <span class="muted">（消耗品使用增加的寿元，独立字段，不计入属性）</span>
           </el-form-item>
         </template>
 
