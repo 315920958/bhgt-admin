@@ -21,7 +21,7 @@ echo "==> 拉取并切换到 $BRANCH 分支"
 git fetch origin
 git checkout -B "$BRANCH" "origin/$BRANCH"
 
-# 1. 写入前端运行时配置（构建时烤进 dist；.env.* 不进 git）
+# 1. 写入前端运行时配置（构建时烤进 dist；.env.production 已随 test 分支进 git，这里再写一遍保持一致）
 #    VITE_BHGT_SERVER_URL = 前端请求的服务端地址
 #    VITE_APP_ENV = 标记部署环境，供前端判断是否显示 dev 登录等开发态 UI
 cat > .env.production <<EOF
