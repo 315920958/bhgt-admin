@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { request } from '@/network'
 import type { ApiKey } from '@/config/api'
+
+interface StageOption {
+  _id: string
+  code: string
+  name: string
+}
 
 interface BundleBase {
   _id: string
@@ -41,6 +47,8 @@ interface LayoutNode {
 const router = useRouter()
 const loading = ref(false)
 const data = ref<GraphData | null>(null)
+const stageOptions = ref<StageOption[]>([])
+const selectedStageId = ref<string>('')
 
 const CARD_W = 180
 const CARD_H = 90
@@ -51,11 +59,22 @@ const PAD = 40
 async function fetchGraph() {
   loading.value = true
   try {
-    data.value = await request<GraphData>('NODE_BUNDLES_GRAPH' as ApiKey)
+    const params: Record<string, string> = {}
+    if (selectedStageId.value) params.stageId = selectedStageId.value
+    data.value = await request<GraphData>('NODE_BUNDLES_GRAPH' as ApiKey, params)
   } catch {
     data.value = null
   } finally {
     loading.value = false
+  }
+}
+
+async function loadStages() {
+  try {
+    const stages = await request<StageOption[]>('STAGES_LIST')
+    stageOptions.value = Array.isArray(stages) ? stages : []
+  } catch {
+    stageOptions.value = []
   }
 }
 
@@ -164,13 +183,34 @@ function statusText(b: BundleViewItem): string {
   return '缺出口'
 }
 
-onMounted(fetchGraph)
+onMounted(async () => {
+  await loadStages()
+  await fetchGraph()
+})
+
+watch(selectedStageId, () => { fetchGraph() })
 </script>
 
 <template>
   <div v-loading="loading" class="graph-wrap">
     <div class="toolbar">
-      <h3>事件路径图</h3>
+      <div class="toolbar-left">
+        <h3>事件路径图</h3>
+        <el-select
+          v-model="selectedStageId"
+          placeholder="筛选阶段"
+          clearable
+          size="small"
+          style="width: 180px; margin-left: 12px"
+        >
+          <el-option
+            v-for="s in stageOptions"
+            :key="s._id"
+            :label="s.name"
+            :value="s._id"
+          />
+        </el-select>
+      </div>
       <div class="legend">
         <span class="tag normal">正常</span>
         <span class="tag warn">缺入口/缺出口</span>
@@ -240,6 +280,10 @@ export { RefreshRight }
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
+}
+.toolbar-left {
+  display: flex;
+  align-items: center;
 }
 .toolbar h3 {
   margin: 0;
