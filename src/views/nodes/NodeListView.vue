@@ -296,7 +296,7 @@ onMounted(async () => {
             <el-row :gutter="16">
               <el-col :span="12">
                 <el-form-item label="节点 ID" required>
-                  <el-input v-model="dialogForm.code" placeholder="n001" :disabled="dialogMode === 'edit'" />
+                  <el-input v-model="dialogForm.code" placeholder="n001" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">

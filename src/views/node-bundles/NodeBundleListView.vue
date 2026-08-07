@@ -103,7 +103,6 @@ onMounted(() => {
               <el-input
                 v-model="dialogForm.code"
                 placeholder="nb_world_01"
-                :disabled="dialogMode === 'edit'"
               />
             </el-form-item>
           </el-col>
