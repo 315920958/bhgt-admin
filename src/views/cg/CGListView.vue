@@ -35,10 +35,17 @@ const {
   remove: 'CGS_DELETE',
 })
 
-// 打开弹窗时确保 originalUrls 是数组（兼容新建/旧数据缺字段）
+const MIN_STAGES = 2
+
+// 打开弹窗时确保 originalUrls 是数组且至少 MIN_STAGES 个（新建/编辑均适用）
 watch(dialogVisible, (v) => {
-  if (v && !Array.isArray(dialogForm.value.originalUrls)) {
-    dialogForm.value.originalUrls = []
+  if (v) {
+    if (!Array.isArray(dialogForm.value.originalUrls)) {
+      dialogForm.value.originalUrls = []
+    }
+    while (dialogForm.value.originalUrls.length < MIN_STAGES) {
+      dialogForm.value.originalUrls.push('')
+    }
   }
 })
 
@@ -85,6 +92,16 @@ function stagePreview(idx: number) {
 
 function thumbPreview(url?: string) {
   return resolveAssetUrl(url || '', assetBaseUrl)
+}
+
+// 提交前清理 originalUrls：trim 去空字符串
+async function handleSubmit() {
+  if (Array.isArray(dialogForm.value.originalUrls)) {
+    dialogForm.value.originalUrls = dialogForm.value.originalUrls
+      .map((v: string) => (typeof v === 'string' ? v.trim() : ''))
+      .filter((v: string) => v.length > 0)
+  }
+  await submit()
 }
 
 onMounted(fetchList)
@@ -178,7 +195,7 @@ onMounted(fetchList)
                 style="width: 48px; height: 48px; object-fit: cover"
                 fit="cover"
               />
-              <el-button type="danger" link @click="removeStage(idx)">删除</el-button>
+              <el-button type="danger" link :disabled="(dialogForm.originalUrls || []).length <= MIN_STAGES" @click="removeStage(idx)">删除</el-button>
             </div>
             <el-button
               :disabled="(dialogForm.originalUrls || []).length >= MAX_STAGES"
@@ -208,7 +225,7 @@ onMounted(fetchList)
 
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submit" :loading="dialogLoading">保存</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="dialogLoading">保存</el-button>
       </template>
     </el-dialog>
   </div>
