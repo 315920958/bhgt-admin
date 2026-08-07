@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { request } from '@/network'
 import type { ApiKey } from '@/config/api'
+import NodeEditDialog from '@/views/nodes/NodeEditDialog.vue'
 
 interface BundleInfo {
   _id: string
@@ -50,6 +51,10 @@ const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
 const data = ref<InnerData | null>(null)
+
+// 节点编辑弹窗（就地编辑，不离开图）
+const nodeDialogVisible = ref(false)
+const nodeDialogCode = ref('')
 
 const code = computed(() => route.params.code as string)
 
@@ -165,7 +170,13 @@ function isExit(n: InnerNode): boolean {
 }
 
 function editNode(nodeCode: string) {
-  router.push({ path: '/nodes', query: { edit: nodeCode } })
+  nodeDialogCode.value = nodeCode
+  nodeDialogVisible.value = true
+}
+
+function onNodeSaved() {
+  // 编辑保存后刷新图，反映最新的出口/按钮指向变化
+  fetchInner()
 }
 
 onMounted(fetchInner)
@@ -247,6 +258,12 @@ onMounted(fetchInner)
 
       <el-empty v-else-if="!loading" description="该事件暂无节点" />
     </div>
+
+    <NodeEditDialog
+      v-model:visible="nodeDialogVisible"
+      :node-code="nodeDialogCode"
+      @saved="onNodeSaved"
+    />
   </div>
 </template>
 
