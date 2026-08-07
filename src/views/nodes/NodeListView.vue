@@ -10,6 +10,11 @@ interface Stage {
   code: string
   name: string
 }
+interface Bundle {
+  _id: string
+  code: string
+  name: string
+}
 interface Attribute {
   _id: string
   code: string
@@ -57,6 +62,7 @@ interface Node {
   code: string
   name: string
   stageId?: string
+  nodeBundleId?: string
   title: string
   text: string
   imageUrl?: string
@@ -68,6 +74,7 @@ interface Node {
 }
 
 const stages = ref<Stage[]>([])
+const bundles = ref<Bundle[]>([])
 const attributes = ref<Attribute[]>([])
 const nodes = ref<Node[]>([])
 const refsLoading = ref(false)
@@ -75,12 +82,14 @@ const refsLoading = ref(false)
 async function fetchRefs() {
   refsLoading.value = true
   try {
-    const [s, a, n] = await Promise.all([
+    const [s, b, a, n] = await Promise.all([
       request<Stage[]>('STAGES_LIST' as ApiKey),
+      request<Bundle[]>('NODE_BUNDLES_LIST' as ApiKey),
       request<Attribute[]>('ATTRIBUTES_LIST' as ApiKey),
       request<Node[]>('NODES_LIST' as ApiKey),
     ])
     stages.value = s
+    bundles.value = b
     attributes.value = a
     nodes.value = n
   } catch {
@@ -94,6 +103,9 @@ async function fetchRefs() {
 
 function stageName(id?: string) {
   return stages.value.find((s) => s._id === id || s.code === id)?.name || id || '—'
+}
+function bundleName(id?: string) {
+  return bundles.value.find((b) => b._id === id || b.code === id)?.name || id || '—'
 }
 function nodeOptions() {
   return nodes.value.map((n) => ({ label: `${n.name} (${n.code})`, value: n._id || n.code }))
@@ -233,6 +245,9 @@ onMounted(() => {
       <el-table-column label="大阶段" width="140">
         <template #default="{ row }">{{ stageName(row.stageId) }}</template>
       </el-table-column>
+      <el-table-column label="事件" width="140">
+        <template #default="{ row }">{{ bundleName(row.nodeBundleId) }}</template>
+      </el-table-column>
       <el-table-column prop="title" label="剧情标题" show-overflow-tooltip />
       <el-table-column prop="isBattle" label="战斗" width="90">
         <template #default="{ row }">
@@ -280,6 +295,17 @@ onMounted(() => {
                   :key="s._id"
                   :label="`${s.name} (${s.code})`"
                   :value="s._id"
+                />
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="所属事件">
+              <el-select v-model="dialogForm.nodeBundleId" placeholder="请选择（可空）" clearable filterable style="width: 100%">
+                <el-option
+                  v-for="b in bundles"
+                  :key="b._id"
+                  :label="`${b.name} (${b.code})`"
+                  :value="b._id"
                 />
               </el-select>
             </el-form-item>
