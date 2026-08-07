@@ -8,27 +8,12 @@ interface StageOption {
   code: string
   name: string
 }
-interface NodeOption {
-  referenceId: string
-  title: string
-  code: string
-}
-interface BundleOption {
-  _id: string
-  code: string
-  name: string
-}
 interface NodeBundle {
   _id?: string
   code: string
   name: string
   stageId?: string
   description?: string
-  positionX: number
-  positionY: number
-  entryNodeRef: string
-  exitNodeRef: string
-  nextNodeBundleId?: string
 }
 
 const {
@@ -51,8 +36,6 @@ const {
 })
 
 const stageOptions = ref<StageOption[]>([])
-const nodeOptions = ref<NodeOption[]>([])
-const bundleOptions = ref<BundleOption[]>([])
 
 async function loadOptions() {
   try {
@@ -61,31 +44,15 @@ async function loadOptions() {
   } catch {
     stageOptions.value = []
   }
-  try {
-    const nodes = await request<NodeOption[]>('NODES_LIST')
-    nodeOptions.value = (Array.isArray(nodes) ? nodes : []).filter((n) => !!n.referenceId)
-  } catch {
-    nodeOptions.value = []
-  }
-  try {
-    const bundles = await request<BundleOption[]>('NODE_BUNDLES_LIST')
-    bundleOptions.value = Array.isArray(bundles) ? bundles : []
-  } catch {
-    bundleOptions.value = []
-  }
 }
 
 function stageName(id?: string) {
   return stageOptions.value.find((s) => s._id === id)?.name ?? id ?? '-'
 }
-function bundleLabel(id?: string) {
-  const b = bundleOptions.value.find((x) => x._id === id)
-  return b ? `${b.code} · ${b.name}` : id ?? '-'
-}
 
 async function handleCreate() {
   await loadOptions()
-  openCreate({ positionX: 0, positionY: 0 })
+  openCreate()
 }
 async function handleEdit(row: NodeBundle) {
   await loadOptions()
@@ -114,14 +81,6 @@ onMounted(() => {
       <el-table-column prop="name" label="名称" width="160" />
       <el-table-column label="所属阶段" width="160">
         <template #default="{ row }">{{ stageName(row.stageId) }}</template>
-      </el-table-column>
-      <el-table-column prop="entryNodeRef" label="入口节点引用" width="160" show-overflow-tooltip />
-      <el-table-column prop="exitNodeRef" label="出口节点引用" width="160" show-overflow-tooltip />
-      <el-table-column label="后继事件" width="180" show-overflow-tooltip>
-        <template #default="{ row }">{{ bundleLabel(row.nextNodeBundleId) }}</template>
-      </el-table-column>
-      <el-table-column label="坐标" width="110">
-        <template #default="{ row }">{{ row.positionX }}, {{ row.positionY }}</template>
       </el-table-column>
       <el-table-column prop="description" label="说明" show-overflow-tooltip />
       <el-table-column label="操作" width="160" fixed="right">
@@ -171,75 +130,6 @@ onMounted(() => {
             />
           </el-select>
         </el-form-item>
-
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="入口节点引用">
-              <el-select
-                v-model="dialogForm.entryNodeRef"
-                placeholder="选择入口节点 referenceId"
-                clearable
-                filterable
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="n in nodeOptions"
-                  :key="n.referenceId"
-                  :label="`${n.referenceId} · ${n.title}`"
-                  :value="n.referenceId"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="出口节点引用">
-              <el-select
-                v-model="dialogForm.exitNodeRef"
-                placeholder="选择出口节点 referenceId"
-                clearable
-                filterable
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="n in nodeOptions"
-                  :key="n.referenceId"
-                  :label="`${n.referenceId} · ${n.title}`"
-                  :value="n.referenceId"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-form-item label="后继事件">
-          <el-select
-            v-model="dialogForm.nextNodeBundleId"
-            placeholder="请选择后继事件（可空）"
-            clearable
-            filterable
-            style="width: 100%"
-          >
-            <el-option
-              v-for="b in bundleOptions"
-              :key="b._id"
-              :label="`${b.code} · ${b.name}`"
-              :value="b._id"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="图形坐标 X">
-              <el-input-number v-model="dialogForm.positionX" :min="0" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="图形坐标 Y">
-              <el-input-number v-model="dialogForm.positionY" :min="0" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-        </el-row>
 
         <el-form-item label="说明">
           <el-input v-model="dialogForm.description" type="textarea" :rows="3" />
