@@ -17,6 +17,7 @@ import {
   Flag,
   Files,
   Trophy,
+  Share,
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -32,6 +33,7 @@ const menuItems = [
   { path: '/nodes', title: '剧情节点', icon: Reading },
   { path: '/stages', title: '大阶段', icon: Flag },
   { path: '/node-bundles', title: '事件', icon: Files },
+  { path: '/node-bundles/view', title: '事件视图', icon: Share },
   { path: '/products', title: '商品', icon: Goods },
   { path: '/cg', title: 'CG 图鉴', icon: PictureFilled },
   { path: '/realms', title: '境界', icon: Medal },

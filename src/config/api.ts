@@ -84,6 +84,8 @@ export const apiConfig = {
   NODE_BUNDLES_CREATE: { url: '/api/admin/node-bundles', method: 'post' },
   NODE_BUNDLES_UPDATE: { url: '/api/admin/node-bundles/:code', method: 'put', pathParams: ['code'] },
   NODE_BUNDLES_DELETE: { url: '/api/admin/node-bundles/:code', method: 'delete', pathParams: ['code'] },
+  NODE_BUNDLES_GRAPH: { url: '/api/admin/node-bundles/graph', method: 'get' },
+  NODE_BUNDLE_NODES: { url: '/api/admin/node-bundles/:code/nodes', method: 'get', pathParams: ['code'] },
 
   // 境界 config.realms
   REALMS_LIST: { url: '/api/admin/realms', method: 'get' },

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useCrud } from '@/composables/useCrud'
 import { request } from '@/network'
 import type { ApiKey } from '@/config/api'
+
+const route = useRoute()
 
 interface Stage {
   _id: string
@@ -226,9 +229,24 @@ async function handleSubmit() {
   await submit()
 }
 
-onMounted(() => {
-  fetchRefs()
-  fetchList()
+onMounted(async () => {
+  await fetchRefs()
+  await fetchList()
+  const editCode = route.query.edit
+  if (editCode) {
+    const code = String(editCode)
+    const row = list.value.find((n) => n.code === code)
+    if (row) {
+      handleOpenEdit(row)
+    } else {
+      try {
+        const node = await request<Node>('NODES_DETAIL' as ApiKey, { code })
+        if (node) handleOpenEdit(node)
+      } catch {
+        // ignore
+      }
+    }
+  }
 })
 </script>
 

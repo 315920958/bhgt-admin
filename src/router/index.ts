@@ -89,6 +89,18 @@ const router = createRouter({
           meta: { title: '事件' },
         },
         {
+          path: 'node-bundles/view',
+          name: 'NodeBundleGraph',
+          component: () => import('@/views/node-bundles/NodeBundleGraphView.vue'),
+          meta: { title: '事件视图' },
+        },
+        {
+          path: 'node-bundles/:code/view',
+          name: 'NodeBundleInner',
+          component: () => import('@/views/node-bundles/NodeBundleInnerView.vue'),
+          meta: { title: '事件内节点图' },
+        },
+        {
           path: 'battles',
           name: 'BattleConfig',
           component: () => import('@/views/battles/BattleConfigView.vue'),
