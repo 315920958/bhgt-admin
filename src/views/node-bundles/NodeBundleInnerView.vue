@@ -9,8 +9,8 @@ interface BundleInfo {
   code: string
   name: string
   stageId?: string
-  entryNodeRefs: string[]
-  exitNodeRefs: string[]
+  entryNodeCodes: string[]
+  exitNodeCodes: string[]
   isNormal: boolean
 }
 
@@ -18,12 +18,11 @@ interface InnerNode {
   _id: string
   code: string
   name: string
-  referenceId?: string
   title: string
   isBattle: boolean
   inDegree: number
   outDegree: number
-  externalOuts: { referenceId: string; bundleId: string; bundleName: string }[]
+  externalOuts: { code: string; bundleId: string; bundleName: string }[]
   buttons: { code: string; text: string; nextNodeId?: string }[]
 }
 
@@ -74,15 +73,15 @@ async function fetchInner() {
 
 function computeLayout(data: InnerData): LayoutNode[] {
   const nodes = data.nodes
-  const ids = nodes.map((n) => n.referenceId).filter((ref): ref is string => !!ref)
-  const nodeByRef = new Map<string, InnerNode>()
-  for (const n of nodes) if (n.referenceId) nodeByRef.set(n.referenceId, n)
+  const ids = nodes.map((n) => n.code)
+  const nodeByCode = new Map<string, InnerNode>()
+  for (const n of nodes) nodeByCode.set(n.code, n)
 
   const incoming = new Map<string, Set<string>>()
   const outgoing = new Map<string, Set<string>>()
-  for (const ref of ids) {
-    incoming.set(ref, new Set())
-    outgoing.set(ref, new Set())
+  for (const c of ids) {
+    incoming.set(c, new Set())
+    outgoing.set(c, new Set())
   }
   for (const e of data.edges) {
     if (incoming.has(e.to)) incoming.get(e.to)!.add(e.from)
@@ -91,35 +90,35 @@ function computeLayout(data: InnerData): LayoutNode[] {
 
   const layer = new Map<string, number>()
   const visiting = new Set<string>()
-  function dfs(ref: string): number {
-    if (layer.has(ref)) return layer.get(ref)!
-    if (visiting.has(ref)) return 0
-    visiting.add(ref)
+  function dfs(c: string): number {
+    if (layer.has(c)) return layer.get(c)!
+    if (visiting.has(c)) return 0
+    visiting.add(c)
     let max = 0
-    for (const pre of incoming.get(ref) || []) {
+    for (const pre of incoming.get(c) || []) {
       max = Math.max(max, dfs(pre) + 1)
     }
-    visiting.delete(ref)
-    layer.set(ref, max)
+    visiting.delete(c)
+    layer.set(c, max)
     return max
   }
-  for (const ref of ids) dfs(ref)
+  for (const c of ids) dfs(c)
 
   const layers = new Map<number, string[]>()
-  for (const ref of ids) {
-    const l = layer.get(ref) || 0
+  for (const c of ids) {
+    const l = layer.get(c) || 0
     if (!layers.has(l)) layers.set(l, [])
-    layers.get(l)!.push(ref)
+    layers.get(l)!.push(c)
   }
   for (const [, arr] of layers) {
-    arr.sort((a, b) => (nodeByRef.get(a)?.code || '').localeCompare(nodeByRef.get(b)?.code || ''))
+    arr.sort((a, b) => a.localeCompare(b))
   }
 
   const result: LayoutNode[] = []
   for (const [l, arr] of layers) {
-    arr.forEach((ref, idx) => {
+    arr.forEach((c, idx) => {
       result.push({
-        node: nodeByRef.get(ref)!,
+        node: nodeByCode.get(c)!,
         x: PAD + l * (CARD_W + H_GAP),
         y: PAD + idx * (CARD_H + V_GAP),
         layer: l,
@@ -144,7 +143,7 @@ const svgSize = computed(() => {
 
 const layoutMap = computed(() => {
   const map = new Map<string, LayoutNode>()
-  for (const n of layout.value) if (n.node.referenceId) map.set(n.node.referenceId, n)
+  for (const n of layout.value) map.set(n.node.code, n)
   return map
 })
 
@@ -159,10 +158,10 @@ function edgePath(from: LayoutNode, to: LayoutNode): string {
 }
 
 function isEntry(n: InnerNode): boolean {
-  return data.value?.bundle.entryNodeRefs.includes(n.referenceId || '') || false
+  return data.value?.bundle.entryNodeCodes.includes(n.code) || false
 }
 function isExit(n: InnerNode): boolean {
-  return data.value?.bundle.exitNodeRefs.includes(n.referenceId || '') || false
+  return data.value?.bundle.exitNodeCodes.includes(n.code) || false
 }
 
 function editNode(nodeCode: string) {
@@ -188,7 +187,7 @@ onMounted(fetchInner)
 
     <el-alert
       v-if="data && !data.bundle.isNormal"
-      :title="`当前事件非正常：入口节点 ${data.bundle.entryNodeRefs.length} 个，出口节点 ${data.bundle.exitNodeRefs.length} 个`"
+      :title="`当前事件非正常：入口节点 ${data.bundle.entryNodeCodes.length} 个，出口节点 ${data.bundle.exitNodeCodes.length} 个`"
       type="warning"
       :closable="false"
       class="banner"

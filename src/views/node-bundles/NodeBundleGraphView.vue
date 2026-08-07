@@ -12,8 +12,8 @@ interface BundleBase {
 }
 
 interface BundleViewItem extends BundleBase {
-  entryNodeRefs: string[]
-  exitNodeRefs: string[]
+  entryNodeCodes: string[]
+  exitNodeCodes: string[]
   isNormal: boolean
   nextBundleIds: string[]
 }
@@ -21,7 +21,7 @@ interface BundleViewItem extends BundleBase {
 interface BundleEdge {
   from: string
   to: string
-  viaNodeRef: string
+  viaNodeCode: string
 }
 
 interface GraphData {
@@ -159,8 +159,8 @@ function goInner(code: string) {
 
 function statusText(b: BundleViewItem): string {
   if (b.isNormal) return '正常'
-  if (!b.entryNodeRefs.length && !b.exitNodeRefs.length) return '无入口/出口'
-  if (!b.entryNodeRefs.length) return '缺入口'
+  if (!b.entryNodeCodes.length && !b.exitNodeCodes.length) return '无入口/出口'
+  if (!b.entryNodeCodes.length) return '缺入口'
   return '缺出口'
 }
 

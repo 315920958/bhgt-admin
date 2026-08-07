@@ -111,7 +111,9 @@ function bundleName(id?: string) {
   return bundles.value.find((b) => b._id === id || b.code === id)?.name || id || '—'
 }
 function nodeOptions() {
-  return nodes.value.map((n) => ({ label: `${n.name} (${n.code})`, value: n._id || n.code }))
+  return nodes.value
+    .filter((n) => !!n.code)
+    .map((n) => ({ label: `${n.name} (${n.code})`, value: n.code }))
 }
 
 function makeEmptyBattleConfig(): BattleConfig {
