@@ -105,19 +105,19 @@ onMounted(() => {
 <template>
   <div>
     <div class="page-header">
-      <h3>节点包配置（阶段 → 节点包 → 节点）</h3>
-      <el-button type="primary" @click="handleCreate">+ 新增节点包</el-button>
+      <h3>事件配置（阶段 → 事件 → 节点）</h3>
+      <el-button type="primary" @click="handleCreate">+ 新增事件</el-button>
     </div>
 
     <el-table :data="list" v-loading="loading" border style="width: 100%">
-      <el-table-column prop="code" label="节点包 ID" width="150" />
+      <el-table-column prop="code" label="事件 ID" width="150" />
       <el-table-column prop="name" label="名称" width="160" />
       <el-table-column label="所属阶段" width="160">
         <template #default="{ row }">{{ stageName(row.stageId) }}</template>
       </el-table-column>
       <el-table-column prop="entryNodeRef" label="入口节点引用" width="160" show-overflow-tooltip />
       <el-table-column prop="exitNodeRef" label="出口节点引用" width="160" show-overflow-tooltip />
-      <el-table-column label="后继节点包" width="180" show-overflow-tooltip>
+      <el-table-column label="后继事件" width="180" show-overflow-tooltip>
         <template #default="{ row }">{{ bundleLabel(row.nextNodeBundleId) }}</template>
       </el-table-column>
       <el-table-column label="坐标" width="110">
@@ -134,13 +134,13 @@ onMounted(() => {
 
     <el-dialog
       v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新增节点包' : '编辑节点包'"
+      :title="dialogMode === 'create' ? '新增事件' : '编辑事件'"
       width="760px"
     >
       <el-form :model="dialogForm" label-width="120px">
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="节点包 ID" required>
+            <el-form-item label="事件 ID" required>
               <el-input
                 v-model="dialogForm.code"
                 placeholder="nb_world_01"
@@ -211,10 +211,10 @@ onMounted(() => {
           </el-col>
         </el-row>
 
-        <el-form-item label="后继节点包">
+        <el-form-item label="后继事件">
           <el-select
             v-model="dialogForm.nextNodeBundleId"
-            placeholder="请选择后继节点包（可空）"
+            placeholder="请选择后继事件（可空）"
             clearable
             filterable
             style="width: 100%"

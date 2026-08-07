@@ -86,7 +86,7 @@ const router = createRouter({
           path: 'node-bundles',
           name: 'NodeBundleList',
           component: () => import('@/views/node-bundles/NodeBundleListView.vue'),
-          meta: { title: '节点包' },
+          meta: { title: '事件' },
         },
         {
           path: 'battles',
