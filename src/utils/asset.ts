@@ -1,17 +1,17 @@
 /**
  * 资源 URL 处理工具。
  *
- * 设计原则：数据库只存「相对资源域名的路径」（如 `/bhgt-public-files/cg/x.png`），
- * 域名由前端统一配置（VITE_BHGT_ASSET_BASE_URL），这样换 CDN / OSS 域名时无需改数据。
+ * 设计原则：数据库只存「相对 OSS 域名的路径」（如 `/cg/x.png`），
+ * 域名由前端统一配置（VITE_BHGT_OSS_DOMAIN），这样换 OSS / CDN 域名时无需改数据。
  *
  * - stripAssetDomain：把粘贴进来的完整 URL 去掉域名/基础地址，只留路径。
  * - resolveAssetUrl：把存储的路径拼回可访问的完整 URL（已是完整 URL 则原样返回）。
  */
 
 /**
- * 去掉粘贴 URL 中的域名（或配置的基础地址前缀），只返回路径部分。
+ * 去掉粘贴 URL 中的域名（或配置的 OSS 域名前缀），只返回路径部分。
  * @param url   原始输入（可能带 https:// 域名）
- * @param base  配置的资源基础地址（如 https://oss-cn-beijing.aliyuncs.com/bhgt-public-files）
+ * @param base  配置的 OSS 域名（如 https://bhgt-public-files.oss-cn-beijing.aliyuncs.com）
  */
 export function stripAssetDomain(url: string, base: string): string {
   if (!url) return url;

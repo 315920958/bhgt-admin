@@ -9,10 +9,10 @@ export const serverConfig = {
 } as const
 
 /**
- * 资源基础地址（域名 + 可选 bucket 前缀）。
- * 数据库只存相对路径，拼接此地址得到完整可访问 URL。
- * 默认值对应阿里云 OSS 公网地址（bucket=bhgt-public-files，北京）。
+ * 阿里云 OSS 资源域名（三级域名形式 bucket.endpoint）。
+ * 数据库只存相对路径（如 /cg/x.png），拼接此域名得到完整可访问 URL。
+ * 默认值为 OSS 公网地址（bucket=bhgt-public-files，北京）。
  */
-export const assetBaseUrl: string =
-  import.meta.env.VITE_BHGT_ASSET_BASE_URL ||
-  'https://oss-cn-beijing.aliyuncs.com/bhgt-public-files'
+export const ossDomain: string =
+  import.meta.env.VITE_BHGT_OSS_DOMAIN ||
+  'https://bhgt-public-files.oss-cn-beijing.aliyuncs.com'

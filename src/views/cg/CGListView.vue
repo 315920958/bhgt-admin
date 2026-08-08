@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
 import { useCrud } from '@/composables/useCrud'
-import { assetBaseUrl } from '@/config/servers'
+import { ossDomain } from '@/config/servers'
 import { stripAssetDomain, resolveAssetUrl } from '@/utils/asset'
 
 interface CG {
@@ -66,7 +66,7 @@ function onPaste(e: ClipboardEvent, target: PasteTarget) {
   const text = e.clipboardData?.getData('text') ?? ''
   if (!text) return
   e.preventDefault()
-  const stripped = stripAssetDomain(text, assetBaseUrl)
+  const stripped = stripAssetDomain(text, ossDomain)
   if (target === 'thumbnail') dialogForm.value.thumbnailUrl = stripped
   else if (target === 'placeholder') dialogForm.value.placeholderUrl = stripped
   else dialogForm.value.originalUrls[target.stage] = stripped
@@ -76,22 +76,22 @@ function onPaste(e: ClipboardEvent, target: PasteTarget) {
 function onBlur(field: 'thumbnail' | 'placeholder' | number) {
   if (typeof field === 'number') {
     const v = dialogForm.value.originalUrls?.[field]
-    if (v) dialogForm.value.originalUrls[field] = stripAssetDomain(v, assetBaseUrl)
+    if (v) dialogForm.value.originalUrls[field] = stripAssetDomain(v, ossDomain)
   } else if (field === 'thumbnail') {
     const v = dialogForm.value.thumbnailUrl
-    if (v) dialogForm.value.thumbnailUrl = stripAssetDomain(v, assetBaseUrl)
+    if (v) dialogForm.value.thumbnailUrl = stripAssetDomain(v, ossDomain)
   } else {
     const v = dialogForm.value.placeholderUrl
-    if (v) dialogForm.value.placeholderUrl = stripAssetDomain(v, assetBaseUrl)
+    if (v) dialogForm.value.placeholderUrl = stripAssetDomain(v, ossDomain)
   }
 }
 
 function stagePreview(idx: number) {
-  return resolveAssetUrl(dialogForm.value.originalUrls?.[idx] || '', assetBaseUrl)
+  return resolveAssetUrl(dialogForm.value.originalUrls?.[idx] || '', ossDomain)
 }
 
 function thumbPreview(url?: string) {
-  return resolveAssetUrl(url || '', assetBaseUrl)
+  return resolveAssetUrl(url || '', ossDomain)
 }
 
 // 提交前清理 originalUrls：trim 去空字符串
