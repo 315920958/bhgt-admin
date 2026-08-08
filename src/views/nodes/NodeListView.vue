@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { useCrud } from '@/composables/useCrud'
 import { request } from '@/network'
 import type { ApiKey } from '@/config/api'

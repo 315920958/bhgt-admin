@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useCrud } from '@/composables/useCrud'
+import { ossDomain } from '@/config/servers'
+import { resolveAssetUrl } from '@/utils/asset'
+import ImagePathInput from '@/components/ImagePathInput.vue'
 
 interface Stage {
   _id?: string
@@ -37,6 +40,10 @@ const {
   remove: 'STAGES_DELETE',
 })
 
+function thumb(url?: string) {
+  return resolveAssetUrl(url || '', ossDomain)
+}
+
 onMounted(fetchList)
 </script>
 
@@ -50,6 +57,19 @@ onMounted(fetchList)
     <el-table :data="list" v-loading="loading" border style="width: 100%">
       <el-table-column prop="code" label="阶段 ID" width="140" />
       <el-table-column prop="name" label="名称" width="160" />
+      <el-table-column label="地图" width="80" align="center">
+        <template #default="{ row }">
+          <el-image
+            v-if="thumb(row.mapImageUrl)"
+            :src="thumb(row.mapImageUrl)"
+            :preview-src-list="[thumb(row.mapImageUrl)]"
+            preview-teleported
+            style="width: 48px; height: 48px"
+            fit="cover"
+          />
+          <span v-else class="text-gray">—</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="order" label="顺序" width="80" />
       <el-table-column prop="lastNodeCode" label="最后节点" width="140" />
       <el-table-column prop="nextStageCode" label="下一阶段" width="140" />
@@ -130,18 +150,13 @@ onMounted(fetchList)
           <el-input v-model="dialogForm.description" type="textarea" :rows="3" />
         </el-form-item>
 
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="地图图片">
-              <el-input v-model="dialogForm.mapImageUrl" placeholder="https://..." />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="通关图片">
-              <el-input v-model="dialogForm.passImageUrl" placeholder="https://..." />
-            </el-form-item>
-          </el-col>
-        </el-row>
+        <el-form-item label="地图图片">
+          <ImagePathInput v-model="dialogForm.mapImageUrl" />
+        </el-form-item>
+
+        <el-form-item label="通关图片">
+          <ImagePathInput v-model="dialogForm.passImageUrl" />
+        </el-form-item>
 
         <el-form-item label="通关文案">
           <el-input v-model="dialogForm.passText" type="textarea" :rows="3" />
@@ -165,5 +180,8 @@ onMounted(fetchList)
 }
 h3 {
   margin: 0;
+}
+.text-gray {
+  color: #9ca3af;
 }
 </style>

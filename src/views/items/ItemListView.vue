@@ -2,6 +2,9 @@
 import { onMounted, ref, watch } from 'vue'
 import { request } from '@/network'
 import { useCrud } from '@/composables/useCrud'
+import { ossDomain } from '@/config/servers'
+import { resolveAssetUrl } from '@/utils/asset'
+import ImagePathInput from '@/components/ImagePathInput.vue'
 
 type ItemType = 'relic' | 'consumable' | 'plot'
 type TabValue = ItemType | 'all'
@@ -129,6 +132,10 @@ function removeAttributeRow(idx: number) {
   dialogForm.value.attributes.splice(idx, 1)
 }
 
+function thumb(url?: string) {
+  return resolveAssetUrl(url || '', ossDomain)
+}
+
 onMounted(() => {
   fetchList()
   fetchAttributes()
@@ -149,6 +156,19 @@ onMounted(() => {
       </div>
 
       <el-table v-loading="loading" :data="list" stripe border>
+        <el-table-column label="图片" width="80" align="center">
+          <template #default="{ row }">
+            <el-image
+              v-if="thumb(row.imageUrl)"
+              :src="thumb(row.imageUrl)"
+              :preview-src-list="[thumb(row.imageUrl)]"
+              preview-teleported
+              style="width: 44px; height: 44px"
+              fit="cover"
+            />
+            <span v-else class="muted">—</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="code" label="业务标识" width="160" />
         <el-table-column prop="name" label="名称" width="160" />
         <el-table-column prop="description" label="说明" />
@@ -234,8 +254,8 @@ onMounted(() => {
         <el-form-item label="说明">
           <el-input v-model="dialogForm.description" type="textarea" :rows="2" />
         </el-form-item>
-        <el-form-item label="图片链接">
-          <el-input v-model="dialogForm.imageUrl" placeholder="https://..." />
+        <el-form-item label="图片">
+          <ImagePathInput v-model="dialogForm.imageUrl" />
         </el-form-item>
 
         <!-- relic 专属 -->

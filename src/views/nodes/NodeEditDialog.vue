@@ -4,6 +4,7 @@ import { ElMessage } from 'element-plus'
 import { useCrud } from '@/composables/useCrud'
 import { request } from '@/network'
 import type { ApiKey } from '@/config/api'
+import ImagePathInput from '@/components/ImagePathInput.vue'
 
 interface Stage {
   _id: string
@@ -119,12 +120,6 @@ async function fetchRefs() {
   }
 }
 
-function stageName(id?: string) {
-  return stages.value.find((s) => s._id === id || s.code === id)?.name || id || '—'
-}
-function bundleName(id?: string) {
-  return bundles.value.find((b) => b._id === id || b.code === id)?.name || id || '—'
-}
 function nodeOptions() {
   return nodes.value
     .filter((n) => !!n.code)
@@ -301,7 +296,7 @@ watch(
           </el-form-item>
 
           <el-form-item label="剧情图片">
-            <el-input v-model="dialogForm.imageUrl" placeholder="https://..." />
+            <ImagePathInput v-model="dialogForm.imageUrl" />
           </el-form-item>
 
           <el-row :gutter="16">
@@ -360,7 +355,7 @@ watch(
             <el-input v-model="dialogForm.battleConfig.success.text" type="textarea" :rows="3" />
           </el-form-item>
           <el-form-item label="成功图片">
-            <el-input v-model="dialogForm.battleConfig.success.imageUrl" placeholder="https://..." />
+            <ImagePathInput v-model="dialogForm.battleConfig.success.imageUrl" />
           </el-form-item>
           <el-form-item label="成功下一节点">
             <el-select
@@ -384,7 +379,7 @@ watch(
             <el-input v-model="dialogForm.battleConfig.failure.text" type="textarea" :rows="3" />
           </el-form-item>
           <el-form-item label="失败图片">
-            <el-input v-model="dialogForm.battleConfig.failure.imageUrl" placeholder="https://..." />
+            <ImagePathInput v-model="dialogForm.battleConfig.failure.imageUrl" />
           </el-form-item>
           <el-row :gutter="16">
             <el-col :span="12">

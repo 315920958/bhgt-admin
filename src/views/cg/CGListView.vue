@@ -2,7 +2,8 @@
 import { onMounted, watch } from 'vue'
 import { useCrud } from '@/composables/useCrud'
 import { ossDomain } from '@/config/servers'
-import { stripAssetDomain, resolveAssetUrl } from '@/utils/asset'
+import { resolveAssetUrl } from '@/utils/asset'
+import ImagePathInput from '@/components/ImagePathInput.vue'
 
 interface CG {
   _id?: string
@@ -59,37 +60,6 @@ function removeStage(idx: number) {
   dialogForm.value.originalUrls?.splice(idx, 1)
 }
 
-type PasteTarget = 'thumbnail' | 'placeholder' | { stage: number }
-
-// 粘贴完整 URL 时自动去掉域名 / 配置的基础地址，只保留相对路径
-function onPaste(e: ClipboardEvent, target: PasteTarget) {
-  const text = e.clipboardData?.getData('text') ?? ''
-  if (!text) return
-  e.preventDefault()
-  const stripped = stripAssetDomain(text, ossDomain)
-  if (target === 'thumbnail') dialogForm.value.thumbnailUrl = stripped
-  else if (target === 'placeholder') dialogForm.value.placeholderUrl = stripped
-  else dialogForm.value.originalUrls[target.stage] = stripped
-}
-
-// 失焦时再规整一次（手动输入 / 编辑后仍是完整 URL 的情况）
-function onBlur(field: 'thumbnail' | 'placeholder' | number) {
-  if (typeof field === 'number') {
-    const v = dialogForm.value.originalUrls?.[field]
-    if (v) dialogForm.value.originalUrls[field] = stripAssetDomain(v, ossDomain)
-  } else if (field === 'thumbnail') {
-    const v = dialogForm.value.thumbnailUrl
-    if (v) dialogForm.value.thumbnailUrl = stripAssetDomain(v, ossDomain)
-  } else {
-    const v = dialogForm.value.placeholderUrl
-    if (v) dialogForm.value.placeholderUrl = stripAssetDomain(v, ossDomain)
-  }
-}
-
-function stagePreview(idx: number) {
-  return resolveAssetUrl(dialogForm.value.originalUrls?.[idx] || '', ossDomain)
-}
-
 function thumbPreview(url?: string) {
   return resolveAssetUrl(url || '', ossDomain)
 }
@@ -122,6 +92,8 @@ onMounted(fetchList)
           <el-image
             v-if="thumbPreview(row.thumbnailUrl || row.originalUrls?.[0])"
             :src="thumbPreview(row.thumbnailUrl || row.originalUrls?.[0])"
+            :preview-src-list="[thumbPreview(row.thumbnailUrl || row.originalUrls?.[0])]"
+            preview-teleported
             style="width: 60px; height: 60px; object-fit: cover"
             fit="cover"
           />
@@ -167,35 +139,28 @@ onMounted(fetchList)
         </el-row>
 
         <el-form-item label="封面缩略图">
-          <el-input
-            v-model="dialogForm.thumbnailUrl"
-            placeholder="粘贴图片路径（自动去域名）"
-            @blur="onBlur('thumbnail')"
-            @paste="onPaste($event, 'thumbnail')"
-          />
+          <ImagePathInput v-model="dialogForm.thumbnailUrl" />
         </el-form-item>
 
         <el-form-item label="CG 阶段图">
           <div class="stage-list">
             <div
-              v-for="(url, idx) in (dialogForm.originalUrls || [])"
+              v-for="(_url, idx) in (dialogForm.originalUrls || [])"
               :key="idx"
               class="stage-row"
             >
               <span class="stage-idx">第 {{ idx + 1 }} 阶段</span>
-              <el-input
+              <ImagePathInput
                 v-model="dialogForm.originalUrls[idx]"
-                placeholder="粘贴图片路径（自动去域名）"
-                @blur="onBlur(idx)"
-                @paste="onPaste($event, { stage: idx })"
+                :thumb-size="48"
+                :show-full-url="false"
               />
-              <el-image
-                v-if="stagePreview(idx)"
-                :src="stagePreview(idx)"
-                style="width: 48px; height: 48px; object-fit: cover"
-                fit="cover"
-              />
-              <el-button type="danger" link :disabled="(dialogForm.originalUrls || []).length <= MIN_STAGES" @click="removeStage(idx)">删除</el-button>
+              <el-button
+                type="danger"
+                link
+                :disabled="(dialogForm.originalUrls || []).length <= MIN_STAGES"
+                @click="removeStage(idx)"
+              >删除</el-button>
             </div>
             <el-button
               :disabled="(dialogForm.originalUrls || []).length >= MAX_STAGES"
@@ -204,18 +169,13 @@ onMounted(fetchList)
               + 新增阶段图（最多 {{ MAX_STAGES }} 张）
             </el-button>
             <div class="hint">
-              最多 4 张，对应第 1~4 阶段。粘贴完整 URL 会自动去掉域名，只保留相对路径。
+              最多 4 张，对应第 1~4 阶段。只需填域名后的相对路径；粘贴完整 URL 会自动去掉域名。
             </div>
           </div>
         </el-form-item>
 
         <el-form-item label="未解锁占位图">
-          <el-input
-            v-model="dialogForm.placeholderUrl"
-            placeholder="粘贴图片路径（自动去域名）"
-            @blur="onBlur('placeholder')"
-            @paste="onPaste($event, 'placeholder')"
-          />
+          <ImagePathInput v-model="dialogForm.placeholderUrl" />
         </el-form-item>
 
         <el-form-item label="回看剧情文字">
@@ -254,6 +214,10 @@ h3 {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+.stage-row :deep(.image-path-input) {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .stage-idx {
   flex: 0 0 64px;
