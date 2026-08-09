@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { request } from '@/network'
 import type { ApiKey } from '@/config/api'
 import NodeEditDialog from '@/views/nodes/NodeEditDialog.vue'
+import { ossDomain } from '@/config/servers'
+import { resolveAssetUrl } from '@/utils/asset'
 
 interface BundleInfo {
   _id: string
@@ -20,6 +22,7 @@ interface InnerNode {
   code: string
   name: string
   title: string
+  imageUrl?: string
   isBattle: boolean
   inDegree: number
   outDegree: number
@@ -59,7 +62,7 @@ const nodeDialogCode = ref('')
 const code = computed(() => route.params.code as string)
 
 const CARD_W = 160
-const CARD_H = 80
+const CARD_H = 94
 const H_GAP = 70
 const V_GAP = 50
 const PAD = 40
@@ -169,6 +172,10 @@ function isExit(n: InnerNode): boolean {
   return data.value?.bundle.exitNodeCodes.includes(n.code) || false
 }
 
+function thumb(url?: string) {
+  return resolveAssetUrl(url || '', ossDomain)
+}
+
 function editNode(nodeCode: string) {
   nodeDialogCode.value = nodeCode
   nodeDialogVisible.value = true
@@ -246,10 +253,20 @@ onMounted(fetchInner)
           :transform="`translate(${n.x}, ${n.y})`"
           @click="editNode(n.node.code)"
         >
-          <rect width="160" height="80" rx="6" />
-          <text x="80" y="24" class="code" text-anchor="middle">{{ n.node.code }}</text>
-          <text x="80" y="44" class="name" text-anchor="middle">{{ n.node.name }}</text>
-          <text x="80" y="62" class="meta" text-anchor="middle">
+          <rect width="160" height="94" rx="6" />
+          <image
+            v-if="thumb(n.node.imageUrl)"
+            :href="thumb(n.node.imageUrl)"
+            x="8"
+            y="8"
+            width="38"
+            height="38"
+            preserveAspectRatio="xMidYMid slice"
+            class="node-image"
+          />
+          <text x="84" y="24" class="code" text-anchor="middle">{{ n.node.code }}</text>
+          <text x="84" y="44" class="name" text-anchor="middle">{{ n.node.name }}</text>
+          <text x="84" y="70" class="meta" text-anchor="middle">
             {{ n.node.isBattle ? '战斗 · ' : '' }}入{{ n.node.inDegree }} / 出{{ n.node.outDegree }}
             {{ n.node.externalOuts.length ? ` / 外部${n.node.externalOuts.length}` : '' }}
           </text>
@@ -326,6 +343,9 @@ onMounted(fetchInner)
 }
 .node-card {
   cursor: pointer;
+}
+.node-image {
+  clip-path: inset(0 round 4px);
 }
 .node-card rect {
   fill: #fff;

@@ -62,7 +62,8 @@ interface Node {
   code: string
   name: string
   stageId?: string
-  nodeBundleId?: string
+  nodeBundleCode?: string
+  nodeSubCode?: string
   title: string
   text: string
   imageUrl?: string
@@ -78,7 +79,7 @@ const props = defineProps<{
   nodeCode?: string // 编辑目标节点的 code；为空且 create=true 表示新增
   create?: boolean
   // 新增时预置的所属事件（如在某事件内点"新增节点"）
-  presetBundleId?: string
+  presetBundleCode?: string
 }>()
 
 const emit = defineEmits<{
@@ -170,6 +171,12 @@ const {
   remove: 'NODES_DELETE',
 })
 
+const nodeFullCode = computed(() => {
+  const eventCode = String(dialogForm.value.nodeBundleCode || '').trim()
+  const subCode = String(dialogForm.value.nodeSubCode || '').trim()
+  return eventCode && subCode ? `${eventCode}_${subCode}` : ''
+})
+
 const activeTab = ref('basic')
 
 async function loadForm() {
@@ -181,7 +188,7 @@ async function loadForm() {
       afterCompletionOpenShop: false,
       battleConfig: makeEmptyBattleConfig(),
       buttons: [],
-      nodeBundleId: props.presetBundleId || undefined,
+      nodeBundleCode: props.presetBundleCode || undefined,
     })
     return
   }
@@ -254,37 +261,30 @@ watch(
         <el-form :model="dialogForm" label-width="120px">
           <el-row :gutter="16">
             <el-col :span="12">
-              <el-form-item label="节点 ID" required>
-                <el-input v-model="dialogForm.code" placeholder="n001" />
+              <el-form-item label="节点完整编号">
+                <el-input :model-value="nodeFullCode" readonly placeholder="选择事件并填写子编号后自动生成" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="节点名称" required>
-                <el-input v-model="dialogForm.name" placeholder="后台搜索用名称" />
+              <el-form-item label="节点子编号" required>
+                <el-input v-model="dialogForm.nodeSubCode" placeholder="如 01" />
               </el-form-item>
             </el-col>
           </el-row>
 
-          <el-form-item label="所属大阶段" required>
-            <el-select v-model="dialogForm.stageId" placeholder="请选择" style="width: 100%" filterable>
-              <el-option
-                v-for="s in stages"
-                :key="s._id"
-                :label="`${s.name} (${s.code})`"
-                :value="s._id"
-              />
-            </el-select>
-          </el-form-item>
-
-          <el-form-item label="所属事件">
-            <el-select v-model="dialogForm.nodeBundleId" placeholder="请选择（可空）" clearable filterable style="width: 100%">
+          <el-form-item label="所属事件" required>
+            <el-select v-model="dialogForm.nodeBundleCode" placeholder="请选择（可空）" clearable filterable style="width: 100%">
               <el-option
                 v-for="b in bundles"
                 :key="b._id"
                 :label="`${b.name} (${b.code})`"
-                :value="b._id"
+                :value="b.code"
               />
             </el-select>
+          </el-form-item>
+
+          <el-form-item label="节点名称" required>
+            <el-input v-model="dialogForm.name" placeholder="后台搜索用名称" />
           </el-form-item>
 
           <el-form-item label="剧情标题" required>
@@ -296,7 +296,12 @@ watch(
           </el-form-item>
 
           <el-form-item label="剧情图片">
-            <ImagePathInput v-model="dialogForm.imageUrl" />
+            <ImagePathInput
+              v-model="dialogForm.imageUrl"
+              :thumb-size="180"
+              :preview-below="true"
+              class="story-image-input"
+            />
           </el-form-item>
 
           <el-row :gutter="16">

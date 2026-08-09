@@ -70,6 +70,19 @@ onMounted(fetchList)
           <span v-else class="text-gray">—</span>
         </template>
       </el-table-column>
+      <el-table-column label="通关图" width="80" align="center">
+        <template #default="{ row }">
+          <el-image
+            v-if="thumb(row.passImageUrl)"
+            :src="thumb(row.passImageUrl)"
+            :preview-src-list="[thumb(row.passImageUrl)]"
+            preview-teleported
+            style="width: 48px; height: 48px"
+            fit="cover"
+          />
+          <span v-else class="text-gray">—</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="order" label="顺序" width="80" />
       <el-table-column prop="lastNodeCode" label="最后节点" width="140" />
       <el-table-column prop="nextStageCode" label="下一阶段" width="140" />

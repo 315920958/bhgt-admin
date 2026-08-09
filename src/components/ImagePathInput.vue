@@ -24,6 +24,8 @@ const props = withDefaults(
     disabled?: boolean
     /** 是否显示下方完整地址 */
     showFullUrl?: boolean
+    /** 图片预览是否另起一行显示 */
+    previewBelow?: boolean
   }>(),
   {
     modelValue: '',
@@ -31,6 +33,7 @@ const props = withDefaults(
     thumbSize: 56,
     disabled: false,
     showFullUrl: true,
+    previewBelow: false,
   },
 )
 
@@ -63,7 +66,7 @@ function onBlur() {
 
 <template>
   <div class="image-path-input">
-    <div class="ipi-row">
+    <div class="ipi-row" :class="{ 'ipi-row-column': previewBelow }">
       <el-input
         v-model="inner"
         :placeholder="placeholder"
@@ -108,6 +111,13 @@ function onBlur() {
 .ipi-row :deep(.el-input) {
   flex: 1 1 auto;
   min-width: 0;
+}
+.ipi-row-column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.ipi-row-column :deep(.el-input) {
+  width: 100%;
 }
 .ipi-thumb {
   flex: 0 0 auto;

@@ -64,6 +64,10 @@ function thumbPreview(url?: string) {
   return resolveAssetUrl(url || '', ossDomain)
 }
 
+function phasePreviewList(urls?: string[]) {
+  return (urls || []).map((url) => thumbPreview(url)).filter(Boolean)
+}
+
 // 提交前清理 originalUrls：trim 去空字符串
 async function handleSubmit() {
   if (Array.isArray(dialogForm.value.originalUrls)) {
@@ -102,8 +106,19 @@ onMounted(fetchList)
       </el-table-column>
       <el-table-column label="阶段图" width="140">
         <template #default="{ row }">
-          <el-tag v-if="!(row.originalUrls?.length)" type="info" size="small">无</el-tag>
-          <span v-else>{{ row.originalUrls.length }} / {{ MAX_STAGES }}</span>
+          <div v-if="phasePreviewList(row.originalUrls).length" class="phase-thumbs">
+            <el-image
+              v-for="(url, idx) in phasePreviewList(row.originalUrls)"
+              :key="`${row._id || row.code}-phase-${idx}`"
+              :src="url"
+              :preview-src-list="phasePreviewList(row.originalUrls)"
+              :initial-index="idx"
+              preview-teleported
+              class="phase-thumb"
+              fit="cover"
+            />
+          </div>
+          <el-tag v-else type="info" size="small">无</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="回看剧情" show-overflow-tooltip>
@@ -209,6 +224,17 @@ h3 {
   flex-direction: column;
   gap: 10px;
   width: 100%;
+}
+.phase-thumbs {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.phase-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 3px;
 }
 .stage-row {
   display: flex;

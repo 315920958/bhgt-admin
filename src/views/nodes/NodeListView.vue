@@ -4,6 +4,8 @@ import { useRoute } from 'vue-router'
 import { useCrud } from '@/composables/useCrud'
 import { request } from '@/network'
 import type { ApiKey } from '@/config/api'
+import { ossDomain } from '@/config/servers'
+import { resolveAssetUrl } from '@/utils/asset'
 import NodeEditDialog from './NodeEditDialog.vue'
 
 const route = useRoute()
@@ -23,7 +25,7 @@ interface Node {
   code: string
   name: string
   stageId?: string
-  nodeBundleId?: string
+  nodeBundleCode?: string
   title: string
   text: string
   imageUrl?: string
@@ -62,8 +64,12 @@ async function fetchRefs() {
 function stageName(id?: string) {
   return stages.value.find((s) => s._id === id || s.code === id)?.name || id || '—'
 }
-function bundleName(id?: string) {
-  return bundles.value.find((b) => b._id === id || b.code === id)?.name || id || '—'
+function bundleName(code?: string) {
+  return bundles.value.find((b) => b.code === code)?.name || code || '—'
+}
+
+function thumb(url?: string) {
+  return resolveAssetUrl(url || '', ossDomain)
 }
 
 const {
@@ -132,7 +138,22 @@ onMounted(async () => {
         <template #default="{ row }">{{ stageName(row.stageId) }}</template>
       </el-table-column>
       <el-table-column label="事件" width="140">
-        <template #default="{ row }">{{ bundleName(row.nodeBundleId) }}</template>
+        <template #default="{ row }">{{ bundleName(row.nodeBundleCode) }}</template>
+      </el-table-column>
+      <el-table-column label="剧情图片" width="86" align="center">
+        <template #default="{ row }">
+          <el-image
+            v-if="thumb(row.imageUrl)"
+            :src="thumb(row.imageUrl)"
+            :preview-src-list="[thumb(row.imageUrl)]"
+            preview-teleported
+            style="width: 48px; height: 48px"
+            fit="cover"
+          >
+            <template #error><span class="image-error">失败</span></template>
+          </el-image>
+          <span v-else class="text-gray">—</span>
+        </template>
       </el-table-column>
       <el-table-column prop="title" label="剧情标题" show-overflow-tooltip />
       <el-table-column prop="isBattle" label="战斗" width="90">
@@ -170,5 +191,12 @@ onMounted(async () => {
 }
 h3 {
   margin: 0;
+}
+.text-gray {
+  color: #9ca3af;
+}
+.image-error {
+  color: #f56c6c;
+  font-size: 12px;
 }
 </style>
