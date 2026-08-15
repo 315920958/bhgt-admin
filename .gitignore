@@ -8,7 +8,9 @@ dist
 dist-ssr
 *.local
 
-# env：按项目规则，所有 .env.* 文件都必须进 git 跟踪，不得忽略任何 env 文件
+# env：常规环境文件（.env.development / .env.test / .env.production 等）进 git 跟踪
+# 例外：.env.development.local 为开发环境本机私有覆盖文件，仅 development 模式读取，不进 git
+.env.development.local
 
 # Editor directories and files
 .vscode/*
